@@ -191,8 +191,8 @@ public class Casino {
         _player.openInventory(_gui);
     }
 
-    public void showAnimation(Runnable then, sponge.CasinoOutcome result) {
-        sponge.Animation animation = new sponge.Animation(images, 40, result);
+    public void showAnimation(Runnable then, CasinoOutcome result) {
+        Animation animation = new Animation(images, 40, result);
 
         Inventory gui = Inventory.builder()
                 .property(InventoryDimension.of(9, 6))
@@ -214,11 +214,11 @@ public class Casino {
         runWheels(animation, ()->{then.run(); finishAnimation(animation); givePrize(result);});
     }
 
-    private void initWheel(sponge.Animation animation, Wheel wheel) {
+    private void initWheel(Animation animation, Wheel wheel) {
         animation.tickWheel(_player, wheel, getActive(SPINNER_GUI_NAME));
     }
 
-    private void spinWheel(sponge.Animation animation, Wheel wheel, Runnable then) {
+    private void spinWheel(Animation animation, Wheel wheel, Runnable then) {
 
         Inventory inventory = getActive(SPINNER_GUI_NAME);
 
@@ -238,7 +238,7 @@ public class Casino {
         }
     }
 
-    private void runWheels(sponge.Animation animation, Runnable then) {
+    private void runWheels(Animation animation, Runnable then) {
 
         Task.builder().delay(100, TimeUnit.MILLISECONDS).execute(()->{
 
@@ -258,7 +258,7 @@ public class Casino {
         }).submit(PixelmonCasino.instance);
     }
 
-    private void finishAnimation(sponge.Animation animation) {
+    private void finishAnimation(Animation animation) {
         Inventory inventory = getActive(SPINNER_GUI_NAME);
 
         if (inventory == null)
@@ -306,7 +306,7 @@ public class Casino {
         account.get().setMoney(money - fee);
         _player.sendMessage(Text.of(TextColors.GOLD, "[PixelmonCasino] ", TextColors.DARK_AQUA, fee, "$ was taken from your account"));
 
-        sponge.CasinoOutcome outcome = determineResult();
+        CasinoOutcome outcome = determineResult();
 
         showAnimation( ()->active=false, outcome );
     }
@@ -367,11 +367,11 @@ public class Casino {
         return null;
     }
 
-    private sponge.CasinoOutcome determineResult()
+    private CasinoOutcome determineResult()
     {
         _player.sendMessage(Text.of("Casino balance: " + casinoProfit));
 
-        final sponge.CasinoOutcome fail = new sponge.CasinoOutcome( createCasinoView(null, images), null, 0, 0);
+        final CasinoOutcome fail = new CasinoOutcome( createCasinoView(null, images), null, 0, 0);
 
         if (casinoProfit < 0) {
             return fail;
@@ -392,13 +392,13 @@ public class Casino {
             if (Math.random() > winThreshold) {
                 _player.sendMessage(Text.of("Win: ", winningMod));
 
-                return new sponge.CasinoOutcome(createCasinoView(winning, images), winning, winningMod, fee * winningMod);
+                return new CasinoOutcome(createCasinoView(winning, images), winning, winningMod, fee * winningMod);
             }
         }
         return fail;
     }
 
-    private void givePrize(sponge.CasinoOutcome result)
+    private void givePrize(CasinoOutcome result)
     {
         if (result.prize == 0) {
             _player.sendMessage(Text.builder().append(Text.of(TextColors.GOLD, "[PixelmonCasino] ", TextColors.GRAY, "You won nothing! Congrats!")).build());

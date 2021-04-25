@@ -95,7 +95,7 @@ public class Wheel
     {
         ItemType type = icons[ (spin + i) % icons.length ];
         ItemStack icon = ItemStack.of(type);
-        icon.offer(Keys.DISPLAY_NAME, Text.of(sponge.Casino.colors.get(sponge.Casino.winningsTable.get(type)), "x", sponge.Casino.winningsTable.get(type)));
+        icon.offer(Keys.DISPLAY_NAME, Text.of(Casino.colors.get(Casino.winningsTable.get(type)), "x", Casino.winningsTable.get(type)));
         return icon;
     }
 

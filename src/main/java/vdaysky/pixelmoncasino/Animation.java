@@ -17,10 +17,10 @@ public class Animation {
     public final Wheel wheel2;
     public final Wheel wheel3;
 
-    public sponge.CasinoOutcome outcome;
+    public CasinoOutcome outcome;
     public int length;
 
-    public Animation(ArrayList<ItemType> icons, int length, sponge.CasinoOutcome outcome)
+    public Animation(ArrayList<ItemType> icons, int length, CasinoOutcome outcome)
     {
         for (ItemType[] wheel : outcome.visible) {
             System.out.println(Arrays.toString(wheel));

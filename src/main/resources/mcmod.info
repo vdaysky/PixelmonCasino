@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "pixelmon-casino",
+    "name": "Pixelmon Casino",
+    "description": "",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "vdaysky"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

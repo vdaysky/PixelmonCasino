@@ -28,74 +28,21 @@ import java.util.concurrent.TimeUnit;
 public class Casino {
 
     private final Player _player;
-    private Inventory _gui;
-    private float winThreshold = 0.7f;
-
-    private static final String GUI_NAME = "Casino";
-    private static final String SPINNER_GUI_NAME = "Spinner thing";
-    private static final String WINNINGS_TAB = "Winnings Table";
-    private static final String[] ownedGUIs = {GUI_NAME, SPINNER_GUI_NAME, WINNINGS_TAB};
     public boolean active = false;
-
-    public static final int COMMON = 2;
-    public static final int RARE = 3;
-    public static final int GOOD = 4;
-    public static final int EPIC = 5;
-    public static final int LEGEND = 6;
-    public static final int JACKPOT = 10;
-
-    public static final ItemType ICOMMON = Sponge.getRegistry().getType(ItemType.class, "pixelmon:poke_ball").get();
-    public static final ItemType IRARE = Sponge.getRegistry().getType(ItemType.class, "pixelmon:great_ball").get();
-    public static final ItemType IGOOD = Sponge.getRegistry().getType(ItemType.class, "pixelmon:premier_ball").get();
-    public static final ItemType IEPIC = Sponge.getRegistry().getType(ItemType.class, "pixelmon:ultra_ball").get();
-    public static final ItemType ILEGEND = Sponge.getRegistry().getType(ItemType.class, "pixelmon:love_ball").get();
-    public static final ItemType IJACKPOT = Sponge.getRegistry().getType(ItemType.class, "pixelmon:master_ball").get();
-
     private static int casinoProfit = 0;
-
-    public static final LinkedHashMap<ItemType, Integer> winningsTable = new LinkedHashMap<>();
-    public static final HashMap<Integer, TextColor> colors = new HashMap<Integer, TextColor>();
-
-    static {
-        winningsTable.put(ICOMMON, COMMON);
-        winningsTable.put(IRARE, RARE);
-        winningsTable.put(IGOOD, GOOD);
-        winningsTable.put(IEPIC, EPIC);
-        winningsTable.put(ILEGEND, LEGEND);
-        winningsTable.put(IJACKPOT, JACKPOT);
-
-        colors.put(COMMON, TextColors.GREEN);
-        colors.put(RARE, TextColors.DARK_GREEN);
-        colors.put(GOOD, TextColors.YELLOW);
-        colors.put(EPIC, TextColors.LIGHT_PURPLE);
-        colors.put(LEGEND, TextColors.GOLD);
-        colors.put(JACKPOT, TextColors.DARK_RED);
-    }
-
-    private static final ArrayList<ItemType> images = new ArrayList<ItemType>();
-
-    static {
-//        addX(ItemTypes.ANVIL, 9);
-//        addX(ItemTypes.SAPLING, 6);
-//        addX(ItemTypes.BOOK, 5);
-//        addX(ItemTypes.BREAD, 3);
-//        addX(ItemTypes.BRICK, 2);
-//        addX(ItemTypes.GOLDEN_APPLE, 1);
-
-        addX(ICOMMON, 9);
-        addX(IRARE, 6);
-        addX(IGOOD, 5);
-        addX(IEPIC, 3);
-        addX(ILEGEND, 2);
-        addX(IJACKPOT, 1);
-
-    }
-
     private final int fee;
 
-    Slot confirmSlot;
-    Slot cancelSlot;
-    Slot winningsSlot;
+    public static final CasinoConfiguration config = new CasinoConfiguration(2,3,4,5,6,10,
+            Sponge.getRegistry().getType(ItemType.class, "pixelmon:poke_ball").get(),
+            Sponge.getRegistry().getType(ItemType.class, "pixelmon:great_ball").get(),
+            Sponge.getRegistry().getType(ItemType.class, "pixelmon:premier_ball").get(),
+            Sponge.getRegistry().getType(ItemType.class, "pixelmon:ultra_ball").get(),
+            Sponge.getRegistry().getType(ItemType.class, "pixelmon:love_ball").get(),
+            Sponge.getRegistry().getType(ItemType.class, "pixelmon:master_ball").get(),
+            TextColors.GREEN, TextColors.DARK_GREEN,  TextColors.YELLOW, TextColors.LIGHT_PURPLE, TextColors.GOLD, TextColors.DARK_RED,
+            6, 5, 4, 3, 2, 1,
+            0.7f
+    );
 
     SlotPos confirmPos = SlotPos.of(2, 1);
     SlotPos cancelPos = SlotPos.of(6, 1);
@@ -107,29 +54,22 @@ public class Casino {
         this.fee = fee;
     }
 
-    private static void addX(ItemType type, int count)
-    {
-        for (int i = 0; i < count; i++) {
-            images.add(type);
-        }
-    }
-
     public void displayWinningTab() {
         Inventory tab = Inventory.builder()
                 .property(InventoryDimension.of(9, 6))
-                .property(InventoryTitle.of(Text.of(WINNINGS_TAB)))
+                .property(InventoryTitle.of(Text.of(config.WINNINGS_TAB)))
                 .build(PixelmonCasino.instance);
 
-        ArrayList<ItemType> winningsIcons = new ArrayList<>(winningsTable.keySet());
+        ArrayList<ItemType> winningsIcons = new ArrayList<>(config.winningsTable.keySet());
 
-        for (int i = 0; i < winningsTable.size(); i++) {
+        for (int i = 0; i < config.winningsTable.size(); i++) {
             int x = i%7 + 1;
             int y = i/7 + 1;
 
-            int mod =  winningsTable.get(winningsIcons.get(i));
+            int mod =  config.winningsTable.get(winningsIcons.get(i));
             Slot slot = tab.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(x, y)));
             ItemStack icon = ItemStack.of(winningsIcons.get(i));
-            icon.offer(Keys.DISPLAY_NAME, Text.of( TextColors.DARK_BLUE, "Prize modifier: ", colors.get(mod),  "x" + mod));
+            icon.offer(Keys.DISPLAY_NAME, Text.of( TextColors.DARK_BLUE, "Prize modifier: ", config.colors.get(mod),  "x" + mod));
             slot.set(icon);
         }
 
@@ -171,32 +111,28 @@ public class Casino {
     }
 
     public void showDialog() {
-        _gui = Inventory.builder()
+        Inventory dialog = Inventory.builder()
                 .property(InventoryDimension.of(9, 3))
-                .property(InventoryTitle.of(Text.of(GUI_NAME)))
+                .property(InventoryTitle.of(Text.of(config.GUI_NAME)))
                 .build(PixelmonCasino.instance);
 
-        confirmSlot = _gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(confirmPos));
-        cancelSlot = _gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(cancelPos));
-        winningsSlot = _gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(winningsPos));
+        Slot confirmSlot = dialog.query(QueryOperationTypes.INVENTORY_PROPERTY.of(confirmPos));
+        Slot cancelSlot = dialog.query(QueryOperationTypes.INVENTORY_PROPERTY.of(cancelPos));
+        Slot winningsSlot = dialog.query(QueryOperationTypes.INVENTORY_PROPERTY.of(winningsPos));
 
-        ItemStack confirm = createSpinButton();
-        ItemStack cancel = createCancelButton();
-        ItemStack openWinnings = createTableWinningsButton();
+        confirmSlot.set( createSpinButton() );
+        cancelSlot.set( createCancelButton() );
+        winningsSlot.set( createTableWinningsButton() );
 
-        confirmSlot.set(confirm);
-        cancelSlot.set(cancel);
-        winningsSlot.set(openWinnings);
-
-        _player.openInventory(_gui);
+        _player.openInventory(dialog);
     }
 
     public void showAnimation(Runnable then, CasinoOutcome result) {
-        Animation animation = new Animation(images, 40, result);
+        Animation animation = new Animation(config.images, 40, result);
 
         Inventory gui = Inventory.builder()
                 .property(InventoryDimension.of(9, 6))
-                .property(InventoryTitle.of(Text.of(SPINNER_GUI_NAME)))
+                .property(InventoryTitle.of(Text.of(config.SPINNER_GUI_NAME)))
                 .build(PixelmonCasino.instance);
 
         ItemStack placeholder = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
@@ -215,12 +151,12 @@ public class Casino {
     }
 
     private void initWheel(Animation animation, Wheel wheel) {
-        animation.tickWheel(_player, wheel, getActive(SPINNER_GUI_NAME));
+        animation.tickWheel(_player, wheel, getActive(config.SPINNER_GUI_NAME));
     }
 
     private void spinWheel(Animation animation, Wheel wheel, Runnable then) {
 
-        Inventory inventory = getActive(SPINNER_GUI_NAME);
+        Inventory inventory = getActive(config.SPINNER_GUI_NAME);
 
         if (inventory == null || !active) {
             active = false;
@@ -259,7 +195,7 @@ public class Casino {
     }
 
     private void finishAnimation(Animation animation) {
-        Inventory inventory = getActive(SPINNER_GUI_NAME);
+        Inventory inventory = getActive(config.SPINNER_GUI_NAME);
 
         if (inventory == null)
             return;
@@ -352,7 +288,7 @@ public class Casino {
         ItemType type = icons.get(i);
         int c = 0;
         for (int b = 0; b < icons.size(); b++){
-            if (images.get(b) == type)
+            if (config.images.get(b) == type)
                 c++;
         }
 
@@ -360,8 +296,8 @@ public class Casino {
     }
 
     private ItemType getWinningType(int mod) {
-        for (ItemType key : winningsTable.keySet()) {
-            if (winningsTable.get(key) == mod)
+        for (ItemType key : config.winningsTable.keySet()) {
+            if (config.winningsTable.get(key) == mod)
                 return key;
         }
         return null;
@@ -371,7 +307,7 @@ public class Casino {
     {
         _player.sendMessage(Text.of("Casino balance: " + casinoProfit));
 
-        final CasinoOutcome fail = new CasinoOutcome( createCasinoView(null, images), null, 0, 0);
+        final CasinoOutcome fail = new CasinoOutcome( createCasinoView(null, config.images), null, 0, 0);
 
         if (casinoProfit < 0) {
             return fail;
@@ -389,10 +325,10 @@ public class Casino {
             winningMod = (winningMod > 6) ? ( (winningMod < 10) ? 6 : 10 ) : winningMod;
             ItemType winning = getWinningType(winningMod);
 
-            if (Math.random() > winThreshold) {
+            if (Math.random() > config.winThreshold) {
                 _player.sendMessage(Text.of("Win: ", winningMod));
 
-                return new CasinoOutcome(createCasinoView(winning, images), winning, winningMod, fee * winningMod);
+                return new CasinoOutcome(createCasinoView(winning, config.images), winning, winningMod, fee * winningMod);
             }
         }
         return fail;
@@ -420,7 +356,7 @@ public class Casino {
         Inventory gui = e.getTargetInventory().first();
 
         boolean owned = false;
-        for (String name : ownedGUIs)
+        for (String name : config.ownedGUIs)
         {
             if (gui.getName().get().equalsIgnoreCase(name)) {
                 owned = true;

@@ -32,23 +32,12 @@ public class Wheel
 
     public Wheel(int idx, ItemType[] icons, int x, int height, int wheelYOffset, SoundType sound, int spins, ItemType[] visible)
     {
-        System.out.println("icons: " + icons.length);
-
         this.icons = new ItemType[icons.length];
 
         ArrayList<ItemType> iclist = new ArrayList<>(Arrays.asList(icons));
-
-//        for (ItemType t : visible) {
-//            iclist.remove(t);
-//        }
-
         Collections.shuffle(iclist);
 
-        //ItemType[] reducedIcons = new ItemType[icons.length - visible.length];
-        //iclist.toArray(reducedIcons);
-
         int afterSpinOffset = spins % icons.length;
-        System.out.println("afterSpinOffset = " + spins + " % " + icons.length + " = " + afterSpinOffset);
 
         // set all icons randomly
         for (int i = 0; i < icons.length; i++)
@@ -95,7 +84,7 @@ public class Wheel
     {
         ItemType type = icons[ (spin + i) % icons.length ];
         ItemStack icon = ItemStack.of(type);
-        icon.offer(Keys.DISPLAY_NAME, Text.of(Casino.colors.get(Casino.winningsTable.get(type)), "x", Casino.winningsTable.get(type)));
+        icon.offer(Keys.DISPLAY_NAME, Text.of(Casino.config.colors.get(Casino.config.winningsTable.get(type)), "x", Casino.config.winningsTable.get(type)));
         return icon;
     }
 

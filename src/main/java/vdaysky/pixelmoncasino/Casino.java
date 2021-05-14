@@ -19,7 +19,6 @@ import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.*;
@@ -30,9 +29,8 @@ public class Casino {
     private final Player _player;
     public boolean active = false;
     private static int casinoProfit = 0;
-    private final int fee;
 
-    public static final CasinoConfiguration config = new CasinoConfiguration(2,3,4,5,6,10,
+    public static final CasinoConfiguration defaultConfig = new CasinoConfiguration(2,3,4,5,6,10,
             Sponge.getRegistry().getType(ItemType.class, "pixelmon:poke_ball").get(),
             Sponge.getRegistry().getType(ItemType.class, "pixelmon:great_ball").get(),
             Sponge.getRegistry().getType(ItemType.class, "pixelmon:premier_ball").get(),
@@ -41,17 +39,26 @@ public class Casino {
             Sponge.getRegistry().getType(ItemType.class, "pixelmon:master_ball").get(),
             TextColors.GREEN, TextColors.DARK_GREEN,  TextColors.YELLOW, TextColors.LIGHT_PURPLE, TextColors.GOLD, TextColors.DARK_RED,
             6, 5, 4, 3, 2, 1,
-            0.7f
+            0.7f, 30
     );
+
+    public CasinoConfiguration config;
 
     SlotPos confirmPos = SlotPos.of(2, 1);
     SlotPos cancelPos = SlotPos.of(6, 1);
     SlotPos winningsPos = SlotPos.of(4, 1);
 
 
-    public Casino(Player player, int fee) {
+    private Casino(Player player, CasinoConfiguration config) {
+        this.config = config;
         _player = player;
-        this.fee = fee;
+    }
+
+    public static CasinoMachine create(Player player, CasinoConfiguration config)
+    {
+        CasinoMachine cas = new CasinoMachine(player, config);
+        PixelmonCasino.reg.put(player.getUniqueId(), cas);
+        return cas;
     }
 
     public void displayWinningTab() {
@@ -98,7 +105,7 @@ public class Casino {
     private ItemStack createSpinButton()
     {
         ItemStack btn = ItemStack.of(ItemTypes.EMERALD_BLOCK, 1);
-        btn.offer(Keys.DISPLAY_NAME, Text.of(TextColors.DARK_GREEN, "Play (cost: ", TextColors.GOLD, fee, "$", TextColors.DARK_GREEN,
+        btn.offer(Keys.DISPLAY_NAME, Text.of(TextColors.DARK_GREEN, "Play (cost: ", TextColors.GOLD, config.fee, "$", TextColors.DARK_GREEN,
                 ", balance: ", TextColors.GOLD, getBalance(), "$", TextColors.DARK_GREEN, ")"));
         return btn;
     }
@@ -127,24 +134,71 @@ public class Casino {
         _player.openInventory(dialog);
     }
 
+    private void setLine(Inventory gui, int y, ItemStack item)
+    {
+        for (int x = 0; x < 9; x++) {
+            gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(x, y ))).set(item);
+        }
+    }
+
+    private void setCol(Inventory gui, int x, ItemStack item)
+    {
+        for (int y = 0; y < 6; y++) {
+            gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(x, y))).set(item);
+        }
+    }
+
+    private void set(Inventory gui, int x, int y, ItemStack item) {
+        gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(x, y))).set(item);
+    }
+
     public void showAnimation(Runnable then, CasinoOutcome result) {
-        Animation animation = new Animation(config.images, 40, result);
+        Animation animation = new Animation(config.images, 40, result, config);
 
         Inventory gui = Inventory.builder()
                 .property(InventoryDimension.of(9, 6))
                 .property(InventoryTitle.of(Text.of(config.SPINNER_GUI_NAME)))
                 .build(PixelmonCasino.instance);
 
-        ItemStack placeholder = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
-        placeholder.offer(Keys.DISPLAY_NAME, Text.of(" "));
-        placeholder.offer(Keys.DYE_COLOR, DyeColors.YELLOW);
+        ItemStack cyan = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
+        ItemStack blue = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
+        ItemStack purple = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
+        ItemStack red = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
+        ItemStack magenta = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
+        ItemStack black = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
+        ItemStack green = ItemStack.of(ItemTypes.STAINED_GLASS_PANE);
 
-        gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(0, 3 ))).set(placeholder);
-        gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(2, 3 ))).set(placeholder);
-        gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(3, 3 ))).set(placeholder);
-        gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(5, 3 ))).set(placeholder);
-        gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(6, 3 ))).set(placeholder);
-        gui.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotPos.of(8, 3 ))).set(placeholder);
+        cyan.offer(Keys.DISPLAY_NAME, Text.of(" "));
+        cyan.offer(Keys.DYE_COLOR, DyeColors.CYAN);
+
+        blue.offer(Keys.DISPLAY_NAME, Text.of(" "));
+        blue.offer(Keys.DYE_COLOR, DyeColors.BLUE);
+
+        purple.offer(Keys.DISPLAY_NAME, Text.of(" "));
+        purple.offer(Keys.DYE_COLOR, DyeColors.PURPLE);
+
+        red.offer(Keys.DISPLAY_NAME, Text.of(" "));
+        red.offer(Keys.DYE_COLOR, DyeColors.RED);
+
+        magenta.offer(Keys.DISPLAY_NAME, Text.of(" "));
+        magenta.offer(Keys.DYE_COLOR, DyeColors.MAGENTA);
+
+        black.offer(Keys.DISPLAY_NAME, Text.of(" "));
+        black.offer(Keys.DYE_COLOR, DyeColors.BLACK);
+
+        green.offer(Keys.DISPLAY_NAME, Text.of(" "));
+        green.offer(Keys.DYE_COLOR, DyeColors.LIME);
+
+        setLine(gui, 1, green);
+        setLine(gui, 2, green);
+        setLine(gui, 3, black);
+        setLine(gui, 4, green);
+
+        setLine(gui, 0, black);
+        setLine(gui, 5, black);
+
+        setCol(gui, 0, black);
+        setCol(gui, 8, black);
 
         _player.openInventory(gui);
         runWheels(animation, ()->{then.run(); finishAnimation(animation); givePrize(result);});
@@ -232,15 +286,15 @@ public class Casino {
         }
         int money = account.get().getMoney();
 
-        if (money < fee) {
-            _player.sendMessage(Text.of(TextColors.GOLD, "[PixelmonCasino] ", TextColors.RED, "You don't have enough money! You need " + fee + "$ to play!"));
+        if (money < config.fee) {
+            _player.sendMessage(Text.of(TextColors.GOLD, "[PixelmonCasino] ", TextColors.RED, "You don't have enough money! You need " + config.fee + "$ to play!"));
             return;
         }
-        casinoProfit += fee;
+        casinoProfit += config.fee;
         active = true;
 
-        account.get().setMoney(money - fee);
-        _player.sendMessage(Text.of(TextColors.GOLD, "[PixelmonCasino] ", TextColors.DARK_AQUA, fee, "$ was taken from your account"));
+        account.get().setMoney(money - config.fee);
+        _player.sendMessage(Text.of(TextColors.GOLD, "[PixelmonCasino] ", TextColors.DARK_AQUA, config.fee, "$ was taken from your account"));
 
         CasinoOutcome outcome = determineResult();
 
@@ -313,14 +367,14 @@ public class Casino {
             return fail;
         }
 
-        int casinoProfitModifier = casinoProfit / fee;
+        int casinoProfitModifier = casinoProfit / config.fee;
 
         int safeMod = (int) Math.min( (casinoProfitModifier * 0.8), 10);
         _player.sendMessage(Text.of("safe mod: ", safeMod));
 
         if (safeMod >= 2) {
 
-            int winningMod = 2 + new Random().nextInt( Math.max(safeMod-2, 0) );
+            int winningMod = 2 + new Random().nextInt( Math.max(safeMod-2, 1) );
             _player.sendMessage(Text.of("winningMod: ", winningMod));
             winningMod = (winningMod > 6) ? ( (winningMod < 10) ? 6 : 10 ) : winningMod;
             ItemType winning = getWinningType(winningMod);
@@ -328,7 +382,7 @@ public class Casino {
             if (Math.random() > config.winThreshold) {
                 _player.sendMessage(Text.of("Win: ", winningMod));
 
-                return new CasinoOutcome(createCasinoView(winning, config.images), winning, winningMod, fee * winningMod);
+                return new CasinoOutcome(createCasinoView(winning, config.images), winning, winningMod, config.fee * winningMod);
             }
         }
         return fail;

@@ -28,10 +28,11 @@ public class Wheel
 
     private int delay_delta = 5;
     public int delay = 80;
+    CasinoConfiguration config;
 
-
-    public Wheel(int idx, ItemType[] icons, int x, int height, int wheelYOffset, SoundType sound, int spins, ItemType[] visible)
+    public Wheel(int idx, ItemType[] icons, int x, int height, int wheelYOffset, SoundType sound, int spins, ItemType[] visible, CasinoConfiguration config)
     {
+        this.config = config;
         this.icons = new ItemType[icons.length];
 
         ArrayList<ItemType> iclist = new ArrayList<>(Arrays.asList(icons));
@@ -84,7 +85,7 @@ public class Wheel
     {
         ItemType type = icons[ (spin + i) % icons.length ];
         ItemStack icon = ItemStack.of(type);
-        icon.offer(Keys.DISPLAY_NAME, Text.of(Casino.config.colors.get(Casino.config.winningsTable.get(type)), "x", Casino.config.winningsTable.get(type)));
+        icon.offer(Keys.DISPLAY_NAME, Text.of(config.colors.get(config.winningsTable.get(type)), "x", config.winningsTable.get(type)));
         return icon;
     }
 

@@ -19,17 +19,19 @@ public class Animation {
 
     public CasinoOutcome outcome;
     public int length;
+    CasinoConfiguration config;
 
-    public Animation(ArrayList<ItemType> icons, int length, CasinoOutcome outcome)
+    public Animation(ArrayList<ItemType> icons, int length, CasinoOutcome outcome, CasinoConfiguration config)
     {
+        this.config = config;
         for (ItemType[] wheel : outcome.visible) {
             System.out.println(Arrays.toString(wheel));
         }
 
         this.outcome = outcome;
-        wheel1 = new Wheel(0, cast(icons), 1, 4, 1, SoundTypes.BLOCK_NOTE_CHIME, length, outcome.visible[0]);
-        wheel2 = new Wheel(1, cast(icons), 4, 4, 1, SoundTypes.BLOCK_NOTE_BELL, length, outcome.visible[1]);
-        wheel3 = new Wheel(2, cast(icons), 7, 4, 1, SoundTypes.BLOCK_NOTE_SNARE, length, outcome.visible[2]);
+        wheel1 = new Wheel(0, cast(icons), 1, 4, 1, SoundTypes.BLOCK_NOTE_CHIME, length, outcome.visible[0], config);
+        wheel2 = new Wheel(1, cast(icons), 4, 4, 1, SoundTypes.BLOCK_NOTE_BELL, length, outcome.visible[1], config);
+        wheel3 = new Wheel(2, cast(icons), 7, 4, 1, SoundTypes.BLOCK_NOTE_SNARE, length, outcome.visible[2], config);
 
         this.length = length;
     }

@@ -1,5 +1,6 @@
 package vdaysky.pixelmoncasino;
 
+import com.google.gson.Gson;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.format.TextColor;
@@ -35,13 +36,30 @@ public class CasinoConfiguration {
     public final HashMap<Integer, TextColor> colors = new HashMap<Integer, TextColor>();
     public final ArrayList<ItemType> images = new ArrayList<ItemType>();
 
+    public final int fee;
+
+    public static CasinoConfiguration simple(int fee) {
+
+        return new CasinoConfiguration(2,3,4,5,6,10,
+                Sponge.getRegistry().getType(ItemType.class, "pixelmon:poke_ball").get(),
+                Sponge.getRegistry().getType(ItemType.class, "pixelmon:great_ball").get(),
+                Sponge.getRegistry().getType(ItemType.class, "pixelmon:premier_ball").get(),
+                Sponge.getRegistry().getType(ItemType.class, "pixelmon:ultra_ball").get(),
+                Sponge.getRegistry().getType(ItemType.class, "pixelmon:love_ball").get(),
+                Sponge.getRegistry().getType(ItemType.class, "pixelmon:master_ball").get(),
+                TextColors.GREEN, TextColors.DARK_GREEN,  TextColors.YELLOW, TextColors.LIGHT_PURPLE, TextColors.GOLD, TextColors.DARK_RED,
+                6, 5, 4, 3, 2, 1,
+                0.7f, fee);
+    }
 
     public CasinoConfiguration(int commonMul, int rareMul, int goodMul, int epicMul, int legendMul, int jackpotMul,
                                ItemType com, ItemType rare, ItemType good, ItemType epic, ItemType legend, ItemType jackpot,
                                TextColor commonCol, TextColor rareCol, TextColor goodCol, TextColor epicCol, TextColor legendCol, TextColor jackpotCol,
                                int commonCount, int rareCount, int goodCount, int epicCount, int legendCount, int jackpotCount,
-                               float threshold)
+                               float threshold, int fee)
     {
+
+        this.fee = fee;
         this.winThreshold = threshold;
 
         COMMON = commonMul;
